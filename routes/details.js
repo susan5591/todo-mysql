@@ -137,7 +137,23 @@ route.get("/search/data", async (req,res)=>{
             return res.status(200).send(rows);
         }
     })
-    console.log(sql)
 })
 
+//forlogin
+route.post("/login",async (req,res)=>{
+    const email = req.body.email;
+    const password = req.body.password;
+    const sql = "select * from details where email=? and password=? and is_delete!=1";
+    con.query(sql,[email,password],(err,rows)=>{
+        if(err){
+            return res.status(400).json({message:"Bad Request"})
+        }
+        else if(rows.length === 0){
+            return res.status(404).json({message:"Not Found"})
+        }
+        else{
+            return res.send("Login Successful..")
+        }
+    })
+})
 module.exports = route;
