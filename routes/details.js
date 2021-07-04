@@ -9,6 +9,7 @@ const con = require("../connection");
 //get all the data 
 route.get("/", async (req,res)=>{
     try{        
+        // con.query('SELECT id,name,email,password,title,description FROM details where is_delete!=1',(err,rows,fields)=>{
         con.query('SELECT * FROM details where is_delete!=1',(err,rows,fields)=>{
             if(err){
                 return res.status(400).json({message:"Bad request"})
@@ -119,8 +120,24 @@ route.delete("/:id", async (req,res)=>{
         })
     }catch(err){
         return res.status(400).json({message:"Bad request"})
-    }
-    
+    }    
+})
+
+//for search 
+route.get("/search/data", async (req,res)=>{
+    const data = req.query.name
+    const sql = 'select * from details where is_delete!=1 and details.name like "%'+data+'%"';
+    con.query(sql,(err,rows,fields)=>{
+        if(err ){
+            return res.status(400).json({message:"Bad request"})
+        }
+        else if(rows.length ===0){
+            return res.status(200).send("No such data found");
+        }else{
+            return res.status(200).send(rows);
+        }
+    })
+    console.log(sql)
 })
 
 module.exports = route;
