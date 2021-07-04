@@ -9,8 +9,8 @@ const con = require("../connection");
 //get all the data 
 route.get("/", async (req,res)=>{
     try{        
-        // con.query('SELECT id,name,email,password,title,description FROM details where is_delete!=1',(err,rows,fields)=>{
-        con.query('SELECT * FROM details where is_delete!=1',(err,rows,fields)=>{
+        con.query('SELECT id,name,email,password,title,description FROM details where is_delete!=1',(err,rows,fields)=>{
+        // con.query('SELECT * FROM details where is_delete=0',(err,rows,fields)=>{
             if(err){
                 return res.status(400).json({message:"Bad request"})
             }
@@ -74,20 +74,13 @@ route.patch("/:id",async (req,res)=>{
         const title =req.body.title;
         const description =req.body.description
         const values = [name,email,password,title,description,id]
-        const sql = "select * from details where id=? and is_delete!=1";
-        con.query(sql,[id],(err,rows,result)=>{
-            if(rows.length===0){
-                return res.status(400).json({message:"Bad request"})
-            }else{
-                const sql1 = "update details set name=?, email=?,password=?,title=?,description=? where id=?";
-                con.query(sql1,values,(err,rows,fields)=>{
-                    if(err){
-                        return res.status(400).json({message:"Bad request"})
-                    }
-                     else{
-                        return res.status(200).send("Updated Successfully");
-                    }
-                })
+        const sql1 = "update details set name=?, email=?,password=?,title=?,description=? where id=?";
+        con.query(sql1,values,(err,rows,fields)=>{
+            if(rows.affectedRows){
+                return res.status(400).json({message:"updtated successful"})
+            }
+            else{
+                return res.status(200).send("update unsuccessful");
             }
         })
         
@@ -102,22 +95,17 @@ route.patch("/:id",async (req,res)=>{
 route.delete("/:id", async (req,res)=>{
     try{
         const id = req.params.id;
-        const sql = "select * from details where id=? and is_delete!=1";
-        con.query(sql,[id],(err,rows,result)=>{
-            if(rows.length===0){
+        const sql = 'update details set is_delete=1 where id=?';
+            con.query(sql,[id],(err,rows,fields)=>{
+            if(rows.affectedRows){
+                return res.status(200).send("Deleted Successfully");
+            }
+            else{
+                
                 return res.status(400).json({message:"Bad request"})
-            }else{
-                const sql = 'update details set is_delete=1 where id=?';
-                con.query(sql,[id],(err,rows,fields)=>{
-                    if(err ){
-                        return res.status(400).json({message:"Bad request"})
-                    }
-                    else{
-                        return res.status(200).send("Deleted Successfully");
-                    }
-                })
             }
         })
+
     }catch(err){
         return res.status(400).json({message:"Bad request"})
     }    
