@@ -11,7 +11,6 @@ route.get("/", async (req,res)=>{
     try{        
         con.query('SELECT * FROM details where is_delete!=1',(err,rows,fields)=>{
             if(err){
-                console.log("run")
                 return res.status(400).json({message:"Bad request"})
             }
             return res.status(200).send(rows);
@@ -25,7 +24,7 @@ route.get("/", async (req,res)=>{
 route.get("/:id",async (req,res)=>{
     try{
         const id = req.params.id;
-        const sql = "select * from details where id=?  ";
+        const sql = 'select * from details where is_delete!=1 and id=?';
         con.query(sql,[id],(err,rows,fields)=>{
             if(err || rows.length===0){
                 return res.status(400).json({message:"Bad request"})
@@ -74,7 +73,7 @@ route.patch("/:id",async (req,res)=>{
         const title =req.body.title;
         const description =req.body.description
         const values = [name,email,password,title,description,id]
-        const sql = "select * from details where details.id=?";
+        const sql = "select * from details where id=? and is_delete!=1";
         con.query(sql,[id],(err,rows,result)=>{
             if(rows.length===0){
                 return res.status(400).json({message:"Bad request"})
@@ -102,7 +101,7 @@ route.patch("/:id",async (req,res)=>{
 route.delete("/:id", async (req,res)=>{
     try{
         const id = req.params.id;
-        const sql = "select * from details where details.id=?";
+        const sql = "select * from details where id=? and is_delete!=1";
         con.query(sql,[id],(err,rows,result)=>{
             if(rows.length===0){
                 return res.status(400).json({message:"Bad request"})
