@@ -7,7 +7,16 @@ const con = require("../connection");
 const bcrypt = require("bcrypt");
 
 
-//get all the data 
+/* 
+get all the data  
+returns {
+    'id': int,
+    name : string,
+    email : varchar,
+    title : varchar,
+    description : varchar
+}
+*/
 route.get("/", async (req,res)=>{
     try{        
         con.query('SELECT id,name,email,title,description FROM details where is_delete=0',(err,rows,fields)=>{
@@ -22,13 +31,22 @@ route.get("/", async (req,res)=>{
     }
 })
 
-//get data by id
+/* 
+get data by id
+returns {
+    'id': int,
+    name : string,
+    email : varchar,
+    title : varchar,
+    description : varchar
+}
+*/
 route.get("/:id",async (req,res)=>{
     try{
         const id = req.params.id;
         // const sql = 'select * from details where is_delete!=1 and id=?';
         const sql = 'select id,name,email,title,description from details where is_delete!=1 and id=?';
-        
+
         con.query(sql,[id],(err,rows,fields)=>{
             if(err || rows.length===0){
                 return res.status(400).json({message:"Bad request"})
@@ -43,7 +61,17 @@ route.get("/:id",async (req,res)=>{
 })
 
 
-//post the data
+
+/* 
+post data 
+    'id': int,
+    name : string,
+    email : varchar,
+    password : varchar,
+    title : varchar,
+    description : varchar
+}
+*/
 route.post("/", async (req,res)=>{
     try{
         const salt = 10;
@@ -68,7 +96,15 @@ route.post("/", async (req,res)=>{
     }
 })
 
-//update data by id
+/* 
+update data by id
+    name : string,
+    email : varchar,
+    password : varchar,
+    title : varchar,
+    description : varchar
+}
+*/
 route.patch("/:id",async (req,res)=>{
     try{
         const salt = 10;
@@ -96,7 +132,9 @@ route.patch("/:id",async (req,res)=>{
 })
 
 
-//delete data by id
+/* 
+updates the is_delete value from 0 to 1
+*/
 route.delete("/:id", async (req,res)=>{
     try{
         const id = req.params.id;
@@ -116,10 +154,19 @@ route.delete("/:id", async (req,res)=>{
     }    
 })
 
-//for search 
+/* 
+using query
+returns {
+    'id': int,
+    name : string,
+    email : varchar,
+    title : varchar,
+    description : varchar
+}
+*/
 route.get("/search/data", async (req,res)=>{
     const data = req.query.name
-    const sql = 'select * from details where is_delete!=1 and details.name like "%'+data+'%"';
+    const sql = 'select id,name,email,title,description from details where is_delete!=1 and details.name like "%'+data+'%"';
 
     con.query(sql,(err,rows,fields)=>{
         if(err ){
@@ -133,7 +180,10 @@ route.get("/search/data", async (req,res)=>{
     })
 })
 
-//forlogin
+/* 
+for login
+input: email & password
+*/
 route.post("/login",async (req,res)=>{
     try{
         // const salt = 10;
