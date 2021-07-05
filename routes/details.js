@@ -28,6 +28,7 @@ route.get("/:id",async (req,res)=>{
         const id = req.params.id;
         // const sql = 'select * from details where is_delete!=1 and id=?';
         const sql = 'select id,name,email,title,description from details where is_delete!=1 and id=?';
+        
         con.query(sql,[id],(err,rows,fields)=>{
             if(err || rows.length===0){
                 return res.status(400).json({message:"Bad request"})
@@ -79,6 +80,7 @@ route.patch("/:id",async (req,res)=>{
         const description =req.body.description
         const values = [name,email,password,title,description,id]
         const sql1 = "update details set name=?, email=?,password=?,title=?,description=? where id=?";
+
         con.query(sql1,values,(err,rows,fields)=>{
             if(rows.affectedRows){
                 return res.status(400).json({message:"updtated successful"})
@@ -86,8 +88,7 @@ route.patch("/:id",async (req,res)=>{
             else{
                 return res.status(200).send("update unsuccessful");
             }
-        })
-        
+        })        
     }   
     catch(err){
         return res.status(400).json({message:"Bad request"})
@@ -100,12 +101,12 @@ route.delete("/:id", async (req,res)=>{
     try{
         const id = req.params.id;
         const sql = 'update details set is_delete=1 where id=?';
-            con.query(sql,[id],(err,rows,fields)=>{
+
+        con.query(sql,[id],(err,rows,fields)=>{
             if(rows.affectedRows){
                 return res.status(200).send("Deleted Successfully");
             }
-            else{
-                
+            else{                
                 return res.status(400).json({message:"Bad request"})
             }
         })
@@ -119,6 +120,7 @@ route.delete("/:id", async (req,res)=>{
 route.get("/search/data", async (req,res)=>{
     const data = req.query.name
     const sql = 'select * from details where is_delete!=1 and details.name like "%'+data+'%"';
+
     con.query(sql,(err,rows,fields)=>{
         if(err ){
             return res.status(400).json({message:"Bad request"})
@@ -138,6 +140,7 @@ route.post("/login",async (req,res)=>{
         const email = req.body.email;
         const password = req.body.password;
         const sql = "select * from details where email=? and is_delete!=1";
+        
         await con.query(sql,[email],(err,rows)=>{
             if(err||rows.length===0){
                 return res.status(400).json({message:"Invalid email or password one"})
@@ -153,7 +156,7 @@ route.post("/login",async (req,res)=>{
                         
                         return res.status(200).json({message:"Login successful"});
                     }
-                    console.log("run2")
+
                     res.status(400).send("Invalid email or password two");  
                     
                 })
