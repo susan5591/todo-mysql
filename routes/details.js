@@ -10,8 +10,8 @@ const bcrypt = require("bcrypt");
 //get all the data 
 route.get("/", async (req,res)=>{
     try{        
-        // con.query('SELECT id,name,email,password,title,description FROM details where is_delete!=1',(err,rows,fields)=>{
-        con.query('SELECT * FROM details where is_delete=0',(err,rows,fields)=>{
+        con.query('SELECT id,name,email,title,description FROM details where is_delete=0',(err,rows,fields)=>{
+        // con.query('SELECT * FROM details where is_delete=0',(err,rows,fields)=>{
             if(err){
                 return res.status(400).json({message:"Bad request"})
             }
@@ -26,7 +26,8 @@ route.get("/", async (req,res)=>{
 route.get("/:id",async (req,res)=>{
     try{
         const id = req.params.id;
-        const sql = 'select * from details where is_delete!=1 and id=?';
+        // const sql = 'select * from details where is_delete!=1 and id=?';
+        const sql = 'select id,name,email,title,description from details where is_delete!=1 and id=?';
         con.query(sql,[id],(err,rows,fields)=>{
             if(err || rows.length===0){
                 return res.status(400).json({message:"Bad request"})
@@ -142,7 +143,7 @@ route.post("/login",async (req,res)=>{
                 return res.status(400).json({message:"Invalid email or password one"})
             }
             else{
-                console.log(rows[0].password)//coz the rows returns array.
+                //coz the rows returns array.
                 bcrypt.compare(req.body.password,rows[0].password,(err,result)=>{
                     if(err){
                         console.log("run1")
