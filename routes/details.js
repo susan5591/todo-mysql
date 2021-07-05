@@ -4,13 +4,14 @@ const bodyParser = require("body-parser")
 
 const route = express.Router();
 const con = require("../connection");
+const bcrypt = require("bcrypt");
 
 
 //get all the data 
 route.get("/", async (req,res)=>{
     try{        
-        con.query('SELECT id,name,email,password,title,description FROM details where is_delete!=1',(err,rows,fields)=>{
-        // con.query('SELECT * FROM details where is_delete=0',(err,rows,fields)=>{
+        // con.query('SELECT id,name,email,password,title,description FROM details where is_delete!=1',(err,rows,fields)=>{
+        con.query('SELECT * FROM details where is_delete=0',(err,rows,fields)=>{
             if(err){
                 return res.status(400).json({message:"Bad request"})
             }
@@ -43,10 +44,11 @@ route.get("/:id",async (req,res)=>{
 //post the data
 route.post("/", async (req,res)=>{
     try{
+        const salt = 10;
         const sql = 'insert into details (name,email,password,title,description) values (?,?,?,?,?)';
         const name= req.body.name;
         const email =req.body.email;
-        const password=req.body.password;
+        const password=await bcrypt.hash(req.body.password,salt);
         const title =req.body.title;
         const description =req.body.description
         const values = [name,email,password,title,description]
@@ -67,10 +69,11 @@ route.post("/", async (req,res)=>{
 //update data by id
 route.patch("/:id",async (req,res)=>{
     try{
+        const salt = 10;
         const id = req.params.id;
         const name= req.body.name;
         const email =req.body.email;
-        const password=req.body.password;
+        const password=await bcrypt.hash(req.body.password,salt);
         const title =req.body.title;
         const description =req.body.description
         const values = [name,email,password,title,description,id]
@@ -129,19 +132,35 @@ route.get("/search/data", async (req,res)=>{
 
 //forlogin
 route.post("/login",async (req,res)=>{
-    const email = req.body.email;
-    const password = req.body.password;
-    const sql = "select * from details where email=? and password=? and is_delete!=1";
-    con.query(sql,[email,password],(err,rows)=>{
-        if(err){
-            return res.status(400).json({message:"Bad Request"})
-        }
-        else if(rows.length === 0){
-            return res.status(404).json({message:"Not Found"})
-        }
-        else{
-            return res.send("Login Successful..")
-        }
-    })
+    try{
+        // const salt = 10;
+        const email = req.body.email;
+        const password = req.body.password;
+        const sql = "select * from details where email=? and is_delete!=1";
+        await con.query(sql,[email],(err,rows)=>{
+            if(err||rows.length===0){
+                return res.status(400).json({message:"Invalid email or password one"})
+            }
+            else{
+                console.log(rows[0].password)//coz the rows returns array.
+                bcrypt.compare(req.body.password,rows[0].password,(err,result)=>{
+                    if(err){
+                        console.log("run1")
+                        return res.status(400).send("Invalid email or password one"); 
+                    }
+                    if(result){
+                        
+                        return res.status(200).json({message:"Login successful"});
+                    }
+                    console.log("run2")
+                    res.status(400).send("Invalid email or password two");  
+                    
+                })
+            }
+        })
+    }catch(err){
+        res.status(400).send("Invalid email or password two"); 
+    }
+    
 })
 module.exports = route;
