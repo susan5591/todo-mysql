@@ -217,4 +217,36 @@ route.post("/login",async (req,res)=>{
     }
     
 })
+
+
+//for dynamic catalogs
+route.get('/nav/catalog', async (req,res)=>{
+    try{     
+        await con.query('SELECT * from catalog',(err,rows,fields)=>{   
+            if(rows){
+                const parent = [];
+                const childOf = [];
+                rows.forEach (item => {
+                    const id = item.id; 
+                    const parent_node = item.parent_node;
+                    childOf[id]=childOf[id]||[];
+                    item["child"]=childOf[id];
+                    if(parent_node){
+                        (childOf[parent_node]=childOf[parent_node]||[]).push(item);
+                    }
+                    else{
+                        parent.push(item);
+                    }
+                });
+                return res.status(200).send(parent);
+            }
+            else{
+                return res.status(400).json({message:"Bad request"})
+            }
+        })
+    }catch(err){
+        
+        return res.status(400).json({message:"Bad request"})
+    }
+})
 module.exports = route;
